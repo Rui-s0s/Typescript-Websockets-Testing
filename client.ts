@@ -4,7 +4,6 @@ import readline from 'readline';
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: "> "
 })
 
 const socket = io('http://localhost:3000');

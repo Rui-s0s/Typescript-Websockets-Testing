@@ -10,3 +10,5 @@ export class ChatService {
     };
   }
 }
+
+// Change this to send messages properly
