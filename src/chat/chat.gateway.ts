@@ -5,16 +5,16 @@ import {
   ConnectedSocket,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import {
   JoinRoomPayload,
   SendMessagePayload,
 } from './chat.types';
+import { SendMessageDto } from './dto/send-message.dto';
 
-@WebSocketGateway({
-  cors: { origin: '*' }
-})
+@WebSocketGateway({cors: { origin: '*' }})
 export class ChatGateway {
   @WebSocketServer()
   server!: Server;
@@ -31,14 +31,11 @@ export class ChatGateway {
     client.emit('joinedRoom', payload.room);
   }
 
+  // This activates the validation
   @SubscribeMessage('sendMessage')
-  handleSendMessage(
-    @MessageBody() payload: SendMessagePayload,
-  ) {
-    const message = this.chatService.createMessage(payload);
-
-    this.server
-      .to(payload.room)
-      .emit('newMessage', message);
+  handleMessage(@MessageBody() data: SendMessageDto) {
+    // If the data doesn't match the DTO, this code won't even run!
+    this.server.to(data.room).emit('newMessage', data);
   }
 }
+
