@@ -19,6 +19,15 @@
         <button onclick="send()">Send</button>
     </div>
 
+    <!-- <div id="chat" style="display:none">
+        <div id="messages" style="height: 200px; border: 1px solid #ccc; overflow-y: scroll;"></div>
+         <form id="chat-form">
+            <input id="msg" placeholder="Type message..." autocomplete="off">
+            <button type="submit">Send</button>
+        </form>
+    </div> -->
+    <!-- THIS FOR JUST ENTER -->
+
     <script>
         const socket = io();
 
@@ -41,15 +50,15 @@
         }
 
         socket.on('newMessage', (msg) => {
-        const div = document.getElementById('messages');
-        const p = document.createElement('p');
-        const strong = document.createElement('strong');
-        
-        strong.textContent = msg.username + ": "; // Safe
-        p.textContent = msg.message; // Safe: browser treats <html> as plain text
-        
-        p.prepend(strong);
-        div.appendChild(p);
+            const div = document.getElementById('messages');
+            const p = document.createElement('p');
+            const strong = document.createElement('strong');
+            
+            strong.textContent = msg.username + ": "; // Safe
+            p.textContent = msg.message; // Safe: browser treats <html> as plain text
+            
+            p.prepend(strong);
+            div.appendChild(p);
         });
     </script>
 </body>
