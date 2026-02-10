@@ -12,7 +12,9 @@ import {
   SendMessagePayload,
 } from './chat.types';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({
+  cors: { origin: '*' }
+})
 export class ChatGateway {
   @WebSocketServer()
   server!: Server;
