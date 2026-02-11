@@ -1,0 +1,50 @@
+config:
+  # Replace with your actual NestJS server URL
+  target: "http://localhost:4000"
+  phases:
+    - duration: 60      # Test lasts 60 seconds
+      arrivalRate: 5    # Starts 5 new virtual users every second
+      name: "Warm up"
+    - duration: 30
+      arrivalRate: 20   # Ramps up to 20 new users per second
+      name: "Sustained load"
+  
+  # Load the Socket.io engine
+  engines:
+    socketio: 
+      transports: ["websocket"]
+
+scenarios:
+  - name: "Chat User Flow"
+    engine: socketio
+    flow:
+      # 1. Simulate the 'Join' button click
+      - emit:
+          name: "joinRoom"
+          data:
+            username: "Bot_{{ $uuid }}" # Generates a unique name
+            room: "lobby"
+      
+      # 2. Think time (Wait between 1 to 5 seconds before typing)
+      - think: 2
+
+      # 3. Send a message
+      - emit:
+          name: "sendMessage"
+          data:
+            room: "lobby"
+            username: "Bot_{{ $uuid }}"
+            message: "Hello from the automated test! 🤖"
+
+      # 4. Wait to "read" other messages
+      - pause: 5
+
+      # 5. Send one last message before leaving
+      - emit:
+          name: "sendMessage"
+          data:
+            room: "lobby"
+            username: "Bot_{{ $uuid }}"
+            message: "Okay, I'm heading out. Bye!"
+      
+      # 6. The user "closes the tab" (disconnects automatically at the end of flow)
