@@ -30,20 +30,20 @@ describe('ChatService', () => {
     });
     
     it('should increase count when user joins', () => {
-      service.addUserToRoom('room1', 'john');
+      service.addUserToRoom('room1', 'john', 'socket1');
     
       expect(service.getUserCount('room1')).toBe(1);
     });
     
     it('should track multiple users', () => {
-      service.addUserToRoom('room1', 'john');
-      service.addUserToRoom('room1', 'mary');
+      service.addUserToRoom('room1', 'john', 'socket1');
+      service.addUserToRoom('room1', 'mary', 'socket2');
     
       expect(service.getUserCount('room1')).toBe(2);
     });
     
     it('should decrease count when user leaves', () => {
-      service.addUserToRoom('room1', 'john');
+      service.addUserToRoom('room1', 'john', 'socket1');
       service.removeUserFromRoom('room1', 'john');
     
       expect(service.getUserCount('room1')).toBe(0);

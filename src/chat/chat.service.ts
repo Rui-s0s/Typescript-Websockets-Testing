@@ -42,6 +42,8 @@ export class ChatService {
     return newMessage;
   }
 
-
+  removeUserFromRoom(room: string, username: string) {
+    this.rooms.get(room)?.delete(username);
+  }
 }
 

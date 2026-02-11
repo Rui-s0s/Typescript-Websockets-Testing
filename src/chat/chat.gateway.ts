@@ -24,7 +24,7 @@ export class ChatGateway
   constructor(private readonly chatService: ChatService) {}
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+  // Dont do anything, maybe console.log client.id for debug
   }
 
   handleDisconnect(client: Socket) {
