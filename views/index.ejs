@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><%= title %></title>
+    <title>NestJS Chat</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-    <h1>NestJS Chat</h1>
+    <h1><%= title %></h1>
     
     <div id="login">
         <input id="username" placeholder="Username">
@@ -19,14 +19,6 @@
         <button onclick="send()">Send</button>
     </div>
 
-    <!-- <div id="chat" style="display:none">
-        <div id="messages" style="height: 200px; border: 1px solid #ccc; overflow-y: scroll;"></div>
-         <form id="chat-form">
-            <input id="msg" placeholder="Type message..." autocomplete="off">
-            <button type="submit">Send</button>
-        </form>
-    </div> -->
-    <!-- THIS FOR JUST ENTER -->
 
     <script>
         const socket = io();
@@ -34,10 +26,16 @@
         function connect() {
             const username = document.getElementById('username').value;
             const room = document.getElementById('room').value;
-            
+
+            // Emit join event
             socket.emit('joinRoom', { username, room });
+
+            // Hide login, show chat
             document.getElementById('login').style.display = 'none';
             document.getElementById('chat').style.display = 'block';
+
+            // ✅ Update page title dynamically
+            document.querySelector('h1').textContent = room;
         }
 
         function send() {
