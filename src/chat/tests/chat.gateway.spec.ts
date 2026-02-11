@@ -2,7 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { io, Socket } from 'socket.io-client';
-
 import { ChatGateway } from '../chat.gateway';
 import { ChatService } from '../chat.service';
 
