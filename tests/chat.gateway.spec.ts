@@ -11,6 +11,7 @@ describe('ChatGateway (integration)', () => {
   let port: number;
   let baseUrl: string;
   let clientSocket: Socket;
+  let service: ChatService;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,7 +30,7 @@ describe('ChatGateway (integration)', () => {
 
   beforeEach(async () => {
     // 1. Reset the Backend State
-    const service = app.get(ChatService);
+    service = app.get(ChatService);
     service.resetState();
 
     // 2. Create a fresh socket for the test
@@ -108,6 +109,42 @@ describe('ChatGateway (integration)', () => {
     clientSocket.emit('joinRoom', {
       username: 'TestUser',
       room: 'Room1',
+    });
+  });
+
+  it('should handle 10 simultaneous connections without count errors', async () => {
+    const room = 'multi-test';
+    const totalUsers = 10;
+    const sockets: Socket[] = [];
+
+    // 1. Create and connect all sockets
+    for (let i = 0; i < totalUsers; i++) {
+      const s = io(baseUrl, { transports: ['websocket'], forceNew: true });
+      sockets.push(s);
+    }
+
+    // 2. Wait for all to connect AND emit the join event
+    await Promise.all(sockets.map((s, i) => {
+      return new Promise<void>((resolve) => {
+        s.on('connect', () => {
+          s.emit('joinRoom', { username: `user${i}`, room });
+          resolve();
+        });
+      });
+    }));
+
+    // 3. 🕒 CRITICAL: Give the server a moment to process 10 events
+    // Socket.io events are NOT instant. We wait for the last user to be registered.
+    await new Promise(resolve => setTimeout(resolve, 500)); 
+
+    // 4. Check the service state
+    const count = service.getUserCount(room);
+    expect(count).toBe(totalUsers);
+
+    // 5. CLEANUP: This stops the "Force Exited" error
+    sockets.forEach(s => {
+      s.removeAllListeners();
+      s.disconnect();
     });
   });
 
