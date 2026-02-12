@@ -8,6 +8,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import {
@@ -62,6 +63,7 @@ export class ChatGateway
     this.server.to(payload.room).emit('userCount', { count });
   }    
 
+  @UsePipes(new ValidationPipe())
   @SubscribeMessage('sendMessage')
   handleMessage(@MessageBody() data: SendMessageDto) {
 
