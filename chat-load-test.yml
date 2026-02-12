@@ -22,7 +22,7 @@ scenarios:
           channel: "sendMessage"
           data:
             room: "roomLoad"
-            username: "loadUser"
+            username: "loadUser{{ $randomNumber(1, 100000) }}"
             message: "stress test"
 
       - think: 3
