@@ -1,53 +1,30 @@
 config:
-  # Replace with your actual NestJS server URL
   target: "http://localhost:4000"
   phases:
-    - duration: 60      # Test lasts 60 seconds
-      arrivalRate: 5    # Starts 5 new virtual users every second
-      name: "Warm up"
-    - duration: 30
-      arrivalRate: 20   # Ramps up to 20 new users per second
-      name: "Sustained load"
-  
-  # Load the Socket.io engine
+    - duration: 60
+      arrivalRate: 30   # users/sec
   engines:
-    socketio: 
-      transports: ["websocket"]
+    socketio: {}
 
 scenarios:
-  - name: "Chat User Flow"
+  - name: "chat users"
     engine: socketio
     flow:
-      # 1. Simulate the 'Join' button click
       - emit:
-          name: "joinRoom"
+          channel: "joinRoom"
           data:
-            username: "Bot_{{ $uuid }}" # Generates a unique name
-            room: "lobby"
-      
-      # 2. Think time (Wait between 1 to 5 seconds before typing)
-      - think: 2
+            username: "loadUser{{ $randomNumber(1, 100000) }}"
+            room: "roomLoad"
 
-      # 3. Send a message
+      - think: 1
+
       - emit:
-          name: "sendMessage"
+          channel: "sendMessage"
           data:
-            room: "lobby"
-            username: "Bot_{{ $uuid }}"
-            message: "Hello from the automated test! 🤖"
+            room: "roomLoad"
+            username: "loadUser"
+            message: "stress test"
 
-      # 4. Wait to "read" other messages
-      - pause: 5
+      - think: 3
 
-      # 5. Send one last message before leaving
-      - emit:
-          name: "sendMessage"
-          data:
-            room: "lobby"
-            username: "Bot_{{ $uuid }}"
-            message: "Okay, I'm heading out. Bye!"
-      
-      # 6. The user "closes the tab" (disconnects automatically at the end of flow)
-
-
-# npx artillery run chat-load-test.yml
+#npx artillery run chat-load-test.yml
