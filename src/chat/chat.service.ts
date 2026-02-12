@@ -19,30 +19,38 @@ export class ChatService {
     if (!this.rooms.has(room)) {
       this.rooms.set(room, new Set());
     }
-
-    this.rooms.get(room)!.add(username);
+    
+    // Store the socketId in the room, not the username
+    this.rooms.get(room).add(socketId);
+    
+    // Keep your socketMap as is, because it links ID -> {room, username}
     this.socketMap.set(socketId, { room, username });
   }
 
-  removeUserBySocket(socketId: string): { room: string, username: string } | null {
+  removeUserBySocket(socketId: string) {
     const entry = this.socketMap.get(socketId);
     if (!entry) return null;
 
     const { room, username } = entry;
 
-    // Perform the deletions
-    this.rooms.get(room)?.delete(username);
-    this.socketMap.delete(socketId);
+    // Delete by socketId
+    const roomSet = this.rooms.get(room);
+    if (roomSet) {
+      roomSet.delete(socketId); // Fixed: Logic now uses unique ID
+      if (roomSet.size === 0) {
+        this.rooms.delete(room);
+      }
+    }
 
-    // Return the data we captured BEFORE the delete
+    this.socketMap.delete(socketId);
     return { room, username };
   }
 
-  getUserBySocket(socketId: string): {room: string, username: string} | null  { // NOT USED YET
-    const entry = this.socketMap.get(socketId);
-    if (!entry) return null;
-    return entry;
-  }
+  // getUserBySocket(socketId: string): {room: string, username: string} | null  { 
+  //   const entry = this.socketMap.get(socketId);
+  //   if (!entry) return null;
+  //   return entry;
+  // }
 
   getUserCount(room: string): number {
     return this.rooms.get(room)?.size ?? 0;
