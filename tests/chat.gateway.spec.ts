@@ -55,6 +55,50 @@ describe('ChatGateway (integration)', () => {
     await app.close();
   });
 
+  it('should not broadcast a message that is too long', (done) => {
+    const massiveMessage = 'a'.repeat(5000);
+    
+    // 1. Set up a listener to ensure the message NEVER arrives
+    const failTimeout = setTimeout(() => {
+      // If we reach this timeout, it means no message was broadcasted (Success!)
+      done();
+    }, 1000);
+
+    clientSocket.on('newMessage', () => {
+      clearTimeout(failTimeout);
+      done(new Error('Server should have blocked this massive message!'));
+    });
+
+    // 2. Emit the "bad" data
+    clientSocket.emit('sendMessage', {
+      room: 'Room1',
+      username: 'Spammer',
+      message: massiveMessage
+    });
+  });
+
+  it('should not broadcast when the message is empty', (done) => {
+    // 1. Setup a "Success" timer
+    // If 1 second passes and we haven't heard 'newMessage', the validation worked.
+    const successTimer = setTimeout(() => {
+      clientSocket.off('newMessage'); // Clean up listener
+      done();
+    }, 1000);
+
+    // 2. Setup a listener that fails the test if it hears anything
+    clientSocket.on('newMessage', (data) => {
+      clearTimeout(successTimer);
+      done(new Error('Server broadcasted an empty message! Content: ' + data.message));
+    });
+
+    // 3. Emit the "garbage"
+    clientSocket.emit('sendMessage', {
+      room: 'Room1',
+      username: 'TestUser',
+      message: '' // EMPTY STRING
+    });
+  });
+
   it('should increment user count when a user joins a room', (done) => {
     clientSocket.on('userCount', (data) => {
       expect(data.count).toBe(1);
@@ -66,6 +110,7 @@ describe('ChatGateway (integration)', () => {
       room: 'Room1',
     });
   });
+
 
   it('should notify the observer when the leaver disconnects', (done) => {
   const room = 'Room1';
