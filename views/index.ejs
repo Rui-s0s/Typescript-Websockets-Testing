@@ -3,9 +3,16 @@
 <head>
     <title>NestJS Chat</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        /* Simple layout for the user section */
+        #chat-container { display: flex; gap: 20px; }
+        #messages { height: 300px; border: 1px solid #ccc; overflow-y: scroll; flex: 3; padding: 10px; }
+        #users-section { flex: 1; border: 1px solid #eee; padding: 10px; background: #f9f9f9; }
+        .system-msg { color: #888; font-style: italic; font-size: 0.9em; }
+    </style>
 </head>
 <body>
-    <h1><%= title %></h1>
+    <h1 id="room-title">NestJS Chat</h1>
     
     <div id="login">
         <input id="username" placeholder="Username">
@@ -14,11 +21,16 @@
     </div>
 
     <div id="chat" style="display:none">
-        <div id="messages" style="height: 200px; border: 1px solid #ccc; overflow-y: scroll;"></div>
+        <div id="chat-container">
+            <div id="messages"></div>
+            <div id="users-section">
+                <h3>Users Online</h3>
+                <div id="user-count">Count: 0</div>
+            </div>
+        </div>
         <input id="msg" placeholder="Type message...">
         <button onclick="send()">Send</button>
     </div>
-
 
     <script>
         const socket = io();
@@ -26,16 +38,13 @@
         function connect() {
             const username = document.getElementById('username').value;
             const room = document.getElementById('room').value;
+            if(!username || !room) return alert("Enter details");
 
-            // Emit join event
             socket.emit('joinRoom', { username, room });
 
-            // Hide login, show chat
             document.getElementById('login').style.display = 'none';
             document.getElementById('chat').style.display = 'block';
-
-            // ✅ Update page title dynamically
-            document.querySelector('h1').textContent = room;
+            document.getElementById('room-title').textContent = `Room: ${room}`;
         }
 
         function send() {
@@ -47,16 +56,53 @@
             document.getElementById('msg').value = '';
         }
 
+        // --- Event Listeners ---
+
+        // Listen for the user count update
+        socket.on('userCount', (data) => {
+            console.log('User count received:', data); // Debugging
+            const countElement = document.getElementById('user-count');
+            if (countElement) {
+                countElement.textContent = `Count: ${data.count}`;
+            }
+        });
+
+        // Listen for our special "Notification" event
+        socket.on('userStatusUpdate', (data) => {
+            const div = document.getElementById('messages');
+            const p = document.createElement('p');
+            p.className = 'system-msg';
+            p.textContent = data.message; // e.g. "John has disconnected"
+            div.appendChild(p);
+            div.scrollTop = div.scrollHeight;
+        });
+
         socket.on('newMessage', (msg) => {
             const div = document.getElementById('messages');
             const p = document.createElement('p');
+            
+            // 1. Format the time [HH:MM:SS]
+            // Assuming msg.timestamp is a valid date string or number from NestJS
+            const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
+            const timeStr = `[${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}] `;
+
+            // 2. Create elements
+            const timeSpan = document.createElement('span');
+            timeSpan.style.color = '#666';
+            timeSpan.textContent = timeStr;
+
             const strong = document.createElement('strong');
+            strong.textContent = `${msg.username}: `;
+
+            const text = document.createTextNode(msg.message);
+
+            // 3. Assemble
+            p.appendChild(timeSpan);
+            p.appendChild(strong);
+            p.appendChild(text);
             
-            strong.textContent = msg.username + ": "; // Safe
-            p.textContent = msg.message; // Safe: browser treats <html> as plain text
-            
-            p.prepend(strong);
             div.appendChild(p);
+            div.scrollTop = div.scrollHeight; // Auto-scroll to bottom
         });
     </script>
 </body>
