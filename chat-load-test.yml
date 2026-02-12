@@ -48,3 +48,6 @@ scenarios:
             message: "Okay, I'm heading out. Bye!"
       
       # 6. The user "closes the tab" (disconnects automatically at the end of flow)
+
+
+# npx artillery run chat-load-test.yml
