@@ -10,6 +10,12 @@ const config: Config = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
 
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/playwright/",    // Ignore the folder
+    "\\.test\\.ts$"    // Ignore the extension
+  ],
+
   testEnvironment: 'node',
 
   collectCoverageFrom: [
