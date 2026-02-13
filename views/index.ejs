@@ -80,13 +80,15 @@
         socket.on('newMessage', (msg) => {
             const div = document.getElementById('messages');
             const p = document.createElement('p');
-            
-            // 1. Format the time [HH:MM:SS]
-            // Assuming msg.timestamp is a valid date string or number from NestJS
+
+            // Attach deterministic ID POSSIBLE IMPLEMENTATION FOR TESTING PURPOSES
+            if (msg.id) {
+                p.dataset.id = msg.id;
+            }
+
             const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
             const timeStr = `[${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}] `;
 
-            // 2. Create elements
             const timeSpan = document.createElement('span');
             timeSpan.style.color = '#666';
             timeSpan.textContent = timeStr;
@@ -96,14 +98,14 @@
 
             const text = document.createTextNode(msg.message);
 
-            // 3. Assemble
             p.appendChild(timeSpan);
             p.appendChild(strong);
             p.appendChild(text);
-            
+
             div.appendChild(p);
-            div.scrollTop = div.scrollHeight; // Auto-scroll to bottom
+            div.scrollTop = div.scrollHeight;
         });
+
     </script>
 </body>
 </html>
