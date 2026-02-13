@@ -3,6 +3,8 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ChatGateway } from './chat.gateway';
+import { randomUUID } from 'crypto'; // THIS FOR UNIQUENESS
+
 
 @Injectable()
 export class ChatService {
@@ -59,6 +61,7 @@ export class ChatService {
   prepareMessage(dto: SendMessageDto): ChatMessage {
     const newMessage: ChatMessage = {
       ...dto,
+      id: randomUUID(),
       timestamp: Date.now(), 
     };
     
