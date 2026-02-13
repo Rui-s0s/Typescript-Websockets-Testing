@@ -8,6 +8,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:play": "playwright test",
+    "test:artillery": "artillery run chat-load-test.yml",
+    "test:check": "node tests/check.js",
     "start": "ts-node src/main.ts",
     "start:dev": "ts-node-dev --respawn --transpile-only src/main.ts"
   },
