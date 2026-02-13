@@ -14,5 +14,5 @@ export interface ChatMessage {
   username: string;
   message: string;
   timestamp: number;
-  id: string; // Unique ID for the message
+  id: string; // Unique ID for the message for testing purposes
 }

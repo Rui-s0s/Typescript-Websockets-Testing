@@ -29,7 +29,7 @@ export class ChatGateway
   ) {}
 
   handleConnection(client: Socket) {
-    // Dont do anything, maybe console.log client.id for debug
+    // Dont do anything yet
   }
 
   handleDisconnect(client: Socket) {
@@ -49,6 +49,7 @@ export class ChatGateway
     });
   }
 
+  // When a client emits joinRoom do this
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
     @MessageBody() payload: JoinRoomPayload,
@@ -63,6 +64,7 @@ export class ChatGateway
     this.server.to(payload.room).emit('userCount', { count });
   }    
 
+  // When a client emits sendMessage do this
   @UsePipes(new ValidationPipe())
   @SubscribeMessage('sendMessage')
   handleMessage(@MessageBody() data: SendMessageDto) {

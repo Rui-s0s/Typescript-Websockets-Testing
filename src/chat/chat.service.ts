@@ -8,37 +8,33 @@ import { randomUUID } from 'crypto'; // THIS FOR UNIQUENESS
 
 @Injectable()
 export class ChatService {
-  // Use the Interface for internal storage blueprint
-  private readonly messages: ChatMessage[] = [];
-  private rooms = new Map<string, Set<string>>();
-  private socketMap = new Map<string, { room: string; username: string }>();
+
+  private readonly messages: ChatMessage[] = [];                              // Can scale with a DB to store messages
+  private rooms = new Map<string, Set<string>>();                             // Maps room name to a set of socketIDs
+  private socketMap = new Map<string, { room: string; username: string }>();  // Maps socketID to room and username
+  
   constructor(
-    @Inject(forwardRef(() => ChatGateway)) // <--- Fixes circular dependency
+    @Inject(forwardRef(() => ChatGateway)) 
     private readonly chatGateway: ChatGateway,
   ) {}
 
-  addUserToRoom(room: string, username: string, socketId: string) {
+  addUserToRoom(room: string, username: string, socketId: string) {           // Stores user by socketID on socketMap and rooms
     if (!this.rooms.has(room)) {
       this.rooms.set(room, new Set());
     }
-    
-    // Store the socketId in the room, not the username
     this.rooms.get(room).add(socketId);
-    
-    // Keep your socketMap as is, because it links ID -> {room, username}
     this.socketMap.set(socketId, { room, username });
   }
 
-  removeUserBySocket(socketId: string) {
-    const entry = this.socketMap.get(socketId);
+  removeUserBySocket(socketId: string) {                                      // Based on socketID data we delete the user from both maps
+    const entry = this.socketMap.get(socketId);                               // returns data for event emissions
     if (!entry) return null;
 
     const { room, username } = entry;
 
-    // Delete by socketId
     const roomSet = this.rooms.get(room);
     if (roomSet) {
-      roomSet.delete(socketId); // Fixed: Logic now uses unique ID
+      roomSet.delete(socketId);
       if (roomSet.size === 0) {
         this.rooms.delete(room);
       }
@@ -54,11 +50,11 @@ export class ChatService {
   //   return entry;
   // }
 
-  getUserCount(room: string): number {
+  getUserCount(room: string): number {                                          // Returns the number of users in a certain room
     return this.rooms.get(room)?.size ?? 0;
   }
 
-  prepareMessage(dto: SendMessageDto): ChatMessage {
+  prepareMessage(dto: SendMessageDto): ChatMessage {                            // Receives a message and adds the timestamp and ID
     const newMessage: ChatMessage = {
       ...dto,
       id: randomUUID(),
@@ -69,8 +65,8 @@ export class ChatService {
     return newMessage;
   }
 
-  @OnEvent('user.left')
-  handleUserLeft(payload: { room: string, username: string, count: number }) {
+  @OnEvent('user.left')                                                         // Listens to user.left event, backend to backend
+  handleUserLeft(payload: { room: string, username: string, count: number }) {  // Broadcast the new user count and userStatusUpdate to frontend
     const { room, username, count } = payload;
 
     // Use this.chatGateway.server to reach the sockets
@@ -83,7 +79,7 @@ export class ChatService {
     });
   }
 
-  resetState() {
+  resetState() {                                                                  // For testing purposes, resets memory state of the service
     this.socketMap.clear();
     this.rooms.clear();
   }
