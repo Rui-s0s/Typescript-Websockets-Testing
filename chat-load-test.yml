@@ -27,4 +27,4 @@ scenarios:
 
       - think: 3
 
-#npx artillery run chat-load-test.yml
+# npx artillery run chat-load-test.yml

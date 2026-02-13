@@ -6,7 +6,7 @@ import { io, Socket } from 'socket.io-client';
 import { ChatGateway } from '../src/chat/chat.gateway';
 import { ChatService } from '../src/chat/chat.service';
 
-describe('ChatGateway (integration)', () => {
+describe('ChatGateway (integration)', () => {                 
   let app: INestApplication;
   let port: number;
   let baseUrl: string;
