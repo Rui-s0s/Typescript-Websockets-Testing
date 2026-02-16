@@ -2,7 +2,8 @@ config:
   target: "http://localhost:4000"
   phases:
     - duration: 60
-      arrivalRate: 30   # users/sec
+      arrivalRate: 5        # users/sec 
+      rampTo: 10            # gradual increase
   engines:
     socketio: {}
 
@@ -16,7 +17,7 @@ scenarios:
             username: "loadUser{{ $randomNumber(1, 100000) }}"
             room: "roomLoad"
 
-      - think: 1
+      - think: 3            # slower pacing 
 
       - emit:
           channel: "sendMessage"
@@ -25,6 +26,7 @@ scenarios:
             username: "loadUser{{ $randomNumber(1, 100000) }}"
             message: "stress test"
 
-      - think: 3
+      - think: 5            # longer delay 
+
 
 # npx artillery run chat-load-test.yml
